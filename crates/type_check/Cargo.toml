@@ -1,0 +1,8 @@
+[package]
+name = "type_check"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+text-size = { workspace = true }
+ast = { path = "../ast" }

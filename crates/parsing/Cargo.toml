@@ -1,0 +1,10 @@
+[package]
+name = "parsing"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+ast = { path = "../ast" }
+logos = { workspace = true }
+drop_bomb = { workspace = true }
+text-size = { workspace = true }
