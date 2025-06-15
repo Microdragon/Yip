@@ -2,7 +2,6 @@ mod alias;
 mod constants;
 mod directives;
 mod enums;
-mod handles;
 mod interfaces;
 mod structure;
 mod unions;
@@ -12,7 +11,6 @@ pub use alias::*;
 pub use constants::*;
 pub use directives::*;
 pub use enums::*;
-pub use handles::*;
 pub use interfaces::*;
 pub use structure::*;
 pub use unions::*;
@@ -31,7 +29,6 @@ ast_multi_node! {
     Union(UnionDefinition) => SyntaxKind::UnionDefinition,
     Enum(EnumDefinition) => SyntaxKind::EnumDefinition,
     Alias(AliasDefinition) => SyntaxKind::AliasDefinition,
-    Handle(HandleDefinition) => SyntaxKind::HandleDefinition,
     Interface(InterfaceDefinition) => SyntaxKind::InterfaceDefinition,
     Const(ConstDefinition) => SyntaxKind::ConstDefinition,
     Module(ModuleDefinition) => SyntaxKind::ModuleDefinition,

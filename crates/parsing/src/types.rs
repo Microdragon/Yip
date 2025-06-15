@@ -4,35 +4,35 @@ use ast::SyntaxKind;
 
 pub fn parse(p: &mut Parser) {
     match p.current() {
-        LexerToken::KeywordBorrow => borrow_type(p),
-        LexerToken::KeywordOwn => own_type(p),
+        LexerToken::KeywordRecv => recv_type(p),
+        LexerToken::KeywordSend => send_type(p),
+        LexerToken::Question => option_type(p),
         LexerToken::KeywordResult => result_type(p),
-        LexerToken::KeywordOption => option_type(p),
         LexerToken::LParentheses => tuple_type(p),
-        LexerToken::KeywordList => list_type(p),
+        LexerToken::LBrackets => list_type(p),
         LexerToken::Identifier => named_type(p),
         _ => p.error("Type"),
     }
 }
 
-fn borrow_type(p: &mut Parser) {
+fn recv_type(p: &mut Parser) {
     let stub = p.start();
 
-    p.bump(LexerToken::KeywordBorrow);
+    p.bump(LexerToken::KeywordRecv);
     p.expect(LexerToken::Whitespace);
-    p.expect(LexerToken::Identifier);
+    utils::path(p);
 
-    stub.complete(p, SyntaxKind::BorrowType);
+    stub.complete(p, SyntaxKind::RecvType);
 }
 
-fn own_type(p: &mut Parser) {
+fn send_type(p: &mut Parser) {
     let stub = p.start();
 
-    p.bump(LexerToken::KeywordOwn);
+    p.bump(LexerToken::KeywordSend);
     p.expect(LexerToken::Whitespace);
-    p.expect(LexerToken::Identifier);
+    utils::path(p);
 
-    stub.complete(p, SyntaxKind::OwnType);
+    stub.complete(p, SyntaxKind::SendType);
 }
 
 fn result_type(p: &mut Parser) {
@@ -55,8 +55,8 @@ fn result_type(p: &mut Parser) {
 fn option_type(p: &mut Parser) {
     let stub = p.start();
 
-    p.bump(LexerToken::KeywordOption);
-    p.expect(LexerToken::Whitespace);
+    p.bump(LexerToken::Question);
+    p.eat(LexerToken::Whitespace);
     parse(p);
 
     stub.complete(p, SyntaxKind::OptionType);
@@ -81,9 +81,18 @@ fn tuple_type(p: &mut Parser) {
 fn list_type(p: &mut Parser) {
     let stub = p.start();
 
-    p.bump(LexerToken::KeywordList);
-    p.expect(LexerToken::Whitespace);
+    p.bump(LexerToken::LBrackets);
+    p.eat(LexerToken::Whitespace);
     parse(p);
+    p.eat(LexerToken::Whitespace);
+
+    if p.eat(LexerToken::Semicolon) {
+        p.eat(LexerToken::Whitespace);
+        p.expect(LexerToken::Integer);
+        p.eat(LexerToken::Whitespace);
+    }
+
+    p.expect(LexerToken::RBrackets);
 
     stub.complete(p, SyntaxKind::ListType);
 }
@@ -105,8 +114,8 @@ mod test {
     #[test]
     fn test_borrow() {
         expect_events!(
-            "borrow test",
-            (start SyntaxKind::BorrowType),
+            "recv test",
+            (start SyntaxKind::RecvType),
             (token SyntaxKind::Keyword),
             (token SyntaxKind::Whitespace),
             (token SyntaxKind::Identifier),
@@ -117,8 +126,8 @@ mod test {
     #[test]
     fn test_own() {
         expect_events!(
-            "own test",
-            (start SyntaxKind::OwnType),
+            "send test",
+            (start SyntaxKind::SendType),
             (token SyntaxKind::Keyword),
             (token SyntaxKind::Whitespace),
             (token SyntaxKind::Identifier),
@@ -162,10 +171,9 @@ mod test {
     #[test]
     fn test_option() {
         expect_events!(
-            "option bool",
+            "?bool",
             (start SyntaxKind::OptionType),
-            (token SyntaxKind::Keyword),
-            (token SyntaxKind::Whitespace),
+            (token SyntaxKind::Punctuation),
             (start SyntaxKind::NamedType),
             (token SyntaxKind::Identifier),
             finish,
@@ -216,26 +224,25 @@ mod test {
     #[test]
     fn test_list() {
         expect_events!(
-            "list bool",
+            "[bool]",
             (start SyntaxKind::ListType),
-            (token SyntaxKind::Keyword),
-            (token SyntaxKind::Whitespace),
+            (token SyntaxKind::Punctuation),
             (start SyntaxKind::NamedType),
-            (token SyntaxKind::Identifier),
+            (token SyntaxKind::Punctuation),
             finish,
             finish
         );
 
         expect_events!(
-            "list yip::bool",
+            "[yip::bool]",
             (start SyntaxKind::ListType),
-            (token SyntaxKind::Keyword),
-            (token SyntaxKind::Whitespace),
+            (token SyntaxKind::Punctuation),
             (start SyntaxKind::NamedType),
             (token SyntaxKind::Identifier),
             (token SyntaxKind::Punctuation),
             (token SyntaxKind::Identifier),
             finish,
+            (token SyntaxKind::Punctuation),
             finish
         );
     }

@@ -57,6 +57,15 @@ fn interface_function(p: &mut Parser) {
         types::parse(p);
     }
 
+    if p.at(LexerToken::Equals) || (p.at(LexerToken::Whitespace) && p.peek_at(LexerToken::Equals)) {
+        p.eat(LexerToken::Whitespace);
+
+        p.bump(LexerToken::Equals);
+        p.eat(LexerToken::Whitespace);
+
+        p.expect(LexerToken::Integer);
+    }
+
     stub.complete(p, SyntaxKind::InterfaceFunction);
 }
 

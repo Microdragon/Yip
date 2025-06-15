@@ -51,8 +51,8 @@ pub enum SyntaxKind {
     TupleType,
     OptionType,
     ResultType,
-    OwnType,
-    BorrowType,
+    SendType,
+    RecvType,
 
     File,
 }

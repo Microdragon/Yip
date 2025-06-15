@@ -122,6 +122,7 @@ fn unary_operator(p: &mut Parser) {
     match current {
         LexerToken::Plus | LexerToken::Minus | LexerToken::Bang => {
             p.do_bump(current.into());
+            p.eat(LexerToken::Whitespace);
             literal(p, None);
             stub.complete(p, SyntaxKind::UnaryOperator);
         }

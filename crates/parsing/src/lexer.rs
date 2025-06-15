@@ -22,6 +22,8 @@ pub enum LexerToken {
     Colon,
     #[token("::")]
     ColonColon,
+    #[token(";")]
+    Semicolon,
     #[token(",")]
     Comma,
     #[token("@")]
@@ -66,6 +68,8 @@ pub enum LexerToken {
     Bar,
     #[token("||")]
     BarBar,
+    #[token("?")]
+    Question,
     #[token("??")]
     QuestionQuestion,
 
@@ -88,6 +92,8 @@ pub enum LexerToken {
     KeywordFalse,
     #[token("import")]
     KeywordImport,
+    #[token("as")]
+    KeywordAs,
     #[token("plugin")]
     KeywordPlugin,
     #[token("type")]
@@ -98,20 +104,14 @@ pub enum LexerToken {
     KeywordUnion,
     #[token("enum")]
     KeywordEnum,
-    #[token("list")]
-    KeywordList,
-    #[token("option")]
-    KeywordOption,
     #[token("result")]
     KeywordResult,
     #[token("error")]
     KeywordError,
-    #[token("handle")]
-    KeywordHandle,
-    #[token("own")]
-    KeywordOwn,
-    #[token("borrow")]
-    KeywordBorrow,
+    #[token("send")]
+    KeywordSend,
+    #[token("recv")]
+    KeywordRecv,
     #[token("interface")]
     KeywordInterface,
     #[token("fn")]
@@ -144,6 +144,7 @@ impl LexerToken {
             LexerToken::Float => "Float",
             LexerToken::Colon => ":",
             LexerToken::ColonColon => "::",
+            LexerToken::Semicolon => ";",
             LexerToken::Comma => ",",
             LexerToken::AtSign => "@",
             LexerToken::Equals => "=",
@@ -166,6 +167,7 @@ impl LexerToken {
             LexerToken::Caret => "^",
             LexerToken::Bar => "|",
             LexerToken::BarBar => "||",
+            LexerToken::Question => "?",
             LexerToken::QuestionQuestion => "??",
             LexerToken::LParentheses => "(",
             LexerToken::RParentheses => ")",
@@ -176,18 +178,16 @@ impl LexerToken {
             LexerToken::KeywordTrue => "true",
             LexerToken::KeywordFalse => "false",
             LexerToken::KeywordImport => "import",
+            LexerToken::KeywordAs => "as",
             LexerToken::KeywordPlugin => "plugin",
             LexerToken::KeywordType => "type",
             LexerToken::KeywordStruct => "struct",
             LexerToken::KeywordUnion => "union",
             LexerToken::KeywordEnum => "enum",
-            LexerToken::KeywordList => "list",
-            LexerToken::KeywordOption => "option",
             LexerToken::KeywordResult => "result",
             LexerToken::KeywordError => "error",
-            LexerToken::KeywordHandle => "handle",
-            LexerToken::KeywordOwn => "own",
-            LexerToken::KeywordBorrow => "borrow",
+            LexerToken::KeywordSend => "send",
+            LexerToken::KeywordRecv => "recv",
             LexerToken::KeywordInterface => "interface",
             LexerToken::KeywordFn => "fn",
             LexerToken::KeywordConst => "const",
@@ -213,6 +213,7 @@ impl From<LexerToken> for SyntaxKind {
             LexerToken::Float => SyntaxKind::Float,
             LexerToken::Colon
             | LexerToken::ColonColon
+            | LexerToken::Semicolon
             | LexerToken::Comma
             | LexerToken::AtSign
             | LexerToken::Equals
@@ -235,6 +236,7 @@ impl From<LexerToken> for SyntaxKind {
             | LexerToken::Caret
             | LexerToken::Bar
             | LexerToken::BarBar
+            | LexerToken::Question
             | LexerToken::QuestionQuestion
             | LexerToken::LParentheses
             | LexerToken::RParentheses
@@ -245,18 +247,16 @@ impl From<LexerToken> for SyntaxKind {
             LexerToken::KeywordTrue
             | LexerToken::KeywordFalse
             | LexerToken::KeywordImport
+            | LexerToken::KeywordAs
             | LexerToken::KeywordPlugin
             | LexerToken::KeywordType
             | LexerToken::KeywordStruct
             | LexerToken::KeywordUnion
             | LexerToken::KeywordEnum
-            | LexerToken::KeywordList
-            | LexerToken::KeywordOption
             | LexerToken::KeywordResult
             | LexerToken::KeywordError
-            | LexerToken::KeywordHandle
-            | LexerToken::KeywordOwn
-            | LexerToken::KeywordBorrow
+            | LexerToken::KeywordSend
+            | LexerToken::KeywordRecv
             | LexerToken::KeywordInterface
             | LexerToken::KeywordFn
             | LexerToken::KeywordConst
@@ -455,7 +455,7 @@ mod test {
     #[test]
     fn test_keyword() {
         expect_tokens!(
-            "true false import plugin type struct union enum list option result error handle own borrow interface fn const mod use if then else none",
+            "true false import plugin type struct union enum result error send recv interface fn const mod use if then else none",
             [
                 LexerToken::KeywordTrue,
                 LexerToken::Whitespace,
@@ -473,19 +473,13 @@ mod test {
                 LexerToken::Whitespace,
                 LexerToken::KeywordEnum,
                 LexerToken::Whitespace,
-                LexerToken::KeywordList,
-                LexerToken::Whitespace,
-                LexerToken::KeywordOption,
-                LexerToken::Whitespace,
                 LexerToken::KeywordResult,
                 LexerToken::Whitespace,
                 LexerToken::KeywordError,
                 LexerToken::Whitespace,
-                LexerToken::KeywordHandle,
+                LexerToken::KeywordSend,
                 LexerToken::Whitespace,
-                LexerToken::KeywordOwn,
-                LexerToken::Whitespace,
-                LexerToken::KeywordBorrow,
+                LexerToken::KeywordRecv,
                 LexerToken::Whitespace,
                 LexerToken::KeywordInterface,
                 LexerToken::Whitespace,
@@ -513,7 +507,7 @@ mod test {
         expect_tokens!(
             r"struct Test {
                 a: bool
-                b: list int
+                b: [int]
                 c: (bool, bool)
             }",
             [
@@ -533,9 +527,9 @@ mod test {
                 LexerToken::Identifier,
                 LexerToken::Colon,
                 LexerToken::Whitespace,
-                LexerToken::KeywordList,
-                LexerToken::Whitespace,
+                LexerToken::LBrackets,
                 LexerToken::Identifier,
+                LexerToken::RBrackets,
                 LexerToken::Newline,
                 LexerToken::Whitespace,
                 LexerToken::Identifier,

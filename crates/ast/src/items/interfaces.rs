@@ -38,6 +38,10 @@ impl InterfaceFunction {
     pub fn return_type(&self) -> Option<Type> {
         support::child(&self.0)
     }
+
+    pub fn function_id(&self) -> Option<SyntaxToken> {
+        support::token(&self.0, SyntaxKind::Integer)
+    }
 }
 
 ast_node!(

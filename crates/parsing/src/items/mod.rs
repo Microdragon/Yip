@@ -2,7 +2,6 @@ pub mod alias;
 pub mod constants;
 pub mod directives;
 pub mod enums;
-pub mod handles;
 pub mod interfaces;
 pub mod structure;
 pub mod unions;
@@ -20,7 +19,6 @@ pub fn parse(p: &mut Parser) {
         LexerToken::KeywordUnion => unions::parse(p),
         LexerToken::KeywordEnum => enums::parse(p),
         LexerToken::KeywordType => alias::parse(p),
-        LexerToken::KeywordHandle => handles::parse(p),
         LexerToken::KeywordInterface => interfaces::parse(p),
         LexerToken::KeywordConst => constants::parse(p),
         LexerToken::KeywordMod => parse_module(p),

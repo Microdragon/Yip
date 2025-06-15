@@ -25,6 +25,13 @@ pub fn import_directive(p: &mut Parser) {
 
     p.expect(LexerToken::String);
 
+    if p.at(LexerToken::Whitespace) && p.peek_at(LexerToken::KeywordAs) {
+        p.bump(LexerToken::Whitespace);
+        p.bump(LexerToken::KeywordAs);
+        p.expect(LexerToken::Whitespace);
+        p.expect(LexerToken::Identifier);
+    }
+
     stub.complete(p, SyntaxKind::ImportDirective);
 }
 

@@ -4,8 +4,8 @@ use rowan::ast::{support, AstChildren};
 
 ast_multi_node! {
     Type,
-    Borrow(BorrowType) => SyntaxKind::BorrowType,
-    Own(OwnType) => SyntaxKind::OwnType,
+    Borrow(RecvType) => SyntaxKind::RecvType,
+    Own(SendType) => SyntaxKind::SendType,
     Result(ResultType) => SyntaxKind::ResultType,
     Option(OptionType) => SyntaxKind::OptionType,
     Tuple(TupleType) => SyntaxKind::TupleType,
@@ -13,19 +13,33 @@ ast_multi_node! {
     Named(NamedType) => SyntaxKind::NamedType,
 }
 
-ast_node!(BorrowType, SyntaxKind::BorrowType);
+ast_node!(RecvType, SyntaxKind::RecvType);
 
-impl BorrowType {
+impl RecvType {
     pub fn name(&self) -> SyntaxToken {
         support::token(&self.0, SyntaxKind::Identifier).unwrap()
     }
+
+    pub fn segments(&self) -> impl Iterator<Item = SyntaxToken> {
+        self.0
+            .children_with_tokens()
+            .filter_map(|x| x.into_token())
+            .filter(|x| x.kind() == SyntaxKind::Identifier)
+    }
 }
 
-ast_node!(OwnType, SyntaxKind::OwnType);
+ast_node!(SendType, SyntaxKind::SendType);
 
-impl OwnType {
+impl SendType {
     pub fn name(&self) -> SyntaxToken {
         support::token(&self.0, SyntaxKind::Identifier).unwrap()
+    }
+
+    pub fn segments(&self) -> impl Iterator<Item = SyntaxToken> {
+        self.0
+            .children_with_tokens()
+            .filter_map(|x| x.into_token())
+            .filter(|x| x.kind() == SyntaxKind::Identifier)
     }
 }
 
@@ -58,6 +72,10 @@ ast_node!(ListType, SyntaxKind::ListType);
 impl ListType {
     pub fn inner(&self) -> Type {
         support::child(&self.0).unwrap()
+    }
+
+    pub fn amount(&self) -> Option<SyntaxToken> {
+        support::token(&self.0, SyntaxKind::Integer)
     }
 }
 

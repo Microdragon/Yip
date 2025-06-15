@@ -25,4 +25,8 @@ impl PluginDirective {
     pub fn url(&self) -> SyntaxToken {
         support::token(&self.0, SyntaxKind::String).unwrap()
     }
+
+    pub fn module_name(&self) -> Option<SyntaxToken> {
+        support::token(&self.0, SyntaxKind::Identifier)
+    }
 }
